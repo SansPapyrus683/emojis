@@ -1,0 +1,7 @@
+# the giant kaggle dataset
+data/
+
+# other stuff
+**/__pycache__/
+.idea/
+.vscode/
