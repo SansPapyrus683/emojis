@@ -1,11 +1,10 @@
 import os
 import pathlib
-from PIL import Image
-import torch
+from torch.utils.data import Dataset
 from torchvision import io, transforms
 
 
-class Dataset(torch.utils.data.Dataset):
+class EmojiDataset(Dataset):
     def __init__(self, image_folder_path: str, desired_image_size: tuple[int, int]):
         # initialize the data from the path
         self.data = []
@@ -16,7 +15,7 @@ class Dataset(torch.utils.data.Dataset):
                 continue
             for img in os.listdir(start / domain):
                 path = start / domain / img
-                tensor = io.read_image(str(path))
+                tensor = io.read_image(str(path), io.ImageReadMode.RGB)
                 self.data.append(resize(tensor))
 
     def __getitem__(self, i):
@@ -26,10 +25,3 @@ class Dataset(torch.utils.data.Dataset):
     def __len__(self):
         # return the length of the dataset
         return len(self.data)
-
-
-if __name__ == "__main__":
-    d = Dataset("data/image", (64, 64))
-    x = d[0]
-    print(x)
-    print(transforms.ToPILImage()(x))
