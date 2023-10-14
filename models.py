@@ -1,21 +1,23 @@
 import torch
 
+
 class Generator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
         self.conv = torch.nn.ConvTranspose2d(
-            in_channels=100, 
+            in_channels=100,
             out_channels=64,
             kernel_size=4,
             stride=2,
             padding=1,
             bias=False
-        ) 
+        )
 
     def forward(self, z):
         z = self.conv(z)
         return z
-    
+
+
 class Discriminator(torch.nn.Module):
     def __init__(self) -> None:
         super().__init__()
@@ -30,5 +32,5 @@ class Discriminator(torch.nn.Module):
         )
 
     def forward(self, image):
-        x = self.sigmoid(self.conv(x))
+        x = self.sigmoid(self.conv(image))
         return x
