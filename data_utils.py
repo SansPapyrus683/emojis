@@ -1,7 +1,9 @@
 import os
 import pathlib
+
+from PIL import Image
 from torch.utils.data import Dataset
-from torchvision import io, transforms
+from torchvision import transforms
 
 
 class EmojiDataset(Dataset):
@@ -9,14 +11,16 @@ class EmojiDataset(Dataset):
         # initialize the data from the path
         self.data = []
         start = pathlib.Path(image_folder_path)
-        resize = transforms.Resize(desired_image_size)
+        ops = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Resize(desired_image_size)
+        ])
         for domain in os.listdir(start):
-            if domain in ["KDDI", "DoCoMo", "SoftBank", "Gmail"]:
-                continue
             for img in os.listdir(start / domain):
                 path = start / domain / img
-                tensor = io.read_image(str(path), io.ImageReadMode.RGB)
-                self.data.append(resize(tensor))
+                im = Image.open(path)
+                rgb_im = im.convert("RGBA")
+                self.data.append(ops(rgb_im))
 
     def __getitem__(self, i):
         # return the ith image as a tensor
@@ -25,3 +29,8 @@ class EmojiDataset(Dataset):
     def __len__(self):
         # return the length of the dataset
         return len(self.data)
+
+
+if __name__ == "__main__":
+    data = EmojiDataset("data/image", (64, 64))
+    print(data[0].shape)
