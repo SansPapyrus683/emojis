@@ -1,10 +1,10 @@
-import torch
+from torch import nn
 
 
-class Generator(torch.nn.Module):
-    def __init__(self) -> None:
+class Generator(nn.Module):
+    def __init__(self, side_len: int) -> None:
         super().__init__()
-        self.conv = torch.nn.ConvTranspose2d(
+        self.conv = nn.ConvTranspose2d(
             in_channels=100,
             out_channels=64,
             kernel_size=4,
@@ -18,11 +18,11 @@ class Generator(torch.nn.Module):
         return z
 
 
-class Discriminator(torch.nn.Module):
-    def __init__(self) -> None:
+class Discriminator(nn.Module):
+    def __init__(self, side_len: int) -> None:
         super().__init__()
-        self.sigmoid = torch.nn.Sigmoid()
-        self.conv1 = torch.nn.Conv2d(
+        self.sigmoid = nn.Sigmoid()
+        self.conv1 = nn.Conv2d(
             in_channels=3,
             out_channels=1,
             kernel_size=4,
