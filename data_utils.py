@@ -13,7 +13,7 @@ class EmojiDataset(Dataset):
         start = pathlib.Path(image_folder_path)
         self.ops = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Resize(desired_image_size)
+            transforms.Resize(desired_image_size, antialias=True)
         ])
         for domain in os.listdir(start):
             for img in os.listdir(start / domain):
