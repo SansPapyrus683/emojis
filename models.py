@@ -6,9 +6,8 @@ from utils import conv_sz, conv_t_sz
 
 class Generator(nn.Module):
     def __init__(self,
-        side_len: int,
         in_channels: int = 100,
-        out_channels: int = 64,
+        out_channels: int = 4,
         kernel_size: int = 4,
         stride: int = 2,
         padding: int = 1
@@ -25,7 +24,6 @@ class Generator(nn.Module):
 
     def forward(self, z):
         z = self.conv(z)
-        print(z.shape)
         return z
 
 
