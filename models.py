@@ -1,6 +1,8 @@
 from torch import nn
 from torch.nn import functional as F
 
+from utils import conv_sz, conv_t_sz
+
 
 class Generator(nn.Module):
     def __init__(self,
@@ -9,20 +11,21 @@ class Generator(nn.Module):
         out_channels: int = 64,
         kernel_size: int = 4,
         stride: int = 2,
-        pading: int = 1
+        padding: int = 1
     ) -> None:
         super().__init__()
         self.conv = nn.ConvTranspose2d(
-            in_channels=100,
-            out_channels=64,
-            kernel_size=4,
-            stride=2,
-            padding=1,
+            in_channels=in_channels,
+            out_channels=out_channels,
+            kernel_size=kernel_size,
+            stride=stride,
+            padding=padding,
             bias=False
         )
 
     def forward(self, z):
         z = self.conv(z)
+        print(z.shape)
         return z
 
 
@@ -38,8 +41,11 @@ class Discriminator(nn.Module):
     ):
         super().__init__()
 
-        # https://stackoverflow.com/a/53580139/12128483
-        flatten_size = out_channels * ((side_len - kernel_size + 2 * padding) // stride + 1) ** 2
+        conv_size = conv_sz(
+            side_len, side_len,
+            stride, padding, kernel_size, 1
+        )
+        flatten_size = out_channels * conv_size[0] * conv_size[1]
 
         self.conv1 = nn.Conv2d(
             in_channels=in_channels,
