@@ -1,63 +1,71 @@
 from torch import nn
 from torch.nn import functional as F
 
-from utils import conv_sz, conv_t_sz
+SIDE = 64
 
 
-class Generator(nn.Module):
+class Generator64(nn.Module):
     def __init__(self,
         in_channels: int = 100,
-        out_channels: int = 4,
-        kernel_size: int = 4,
-        stride: int = 2,
-        padding: int = 1
+        out_channels: int = 4
     ) -> None:
         super().__init__()
-        self.conv = nn.ConvTranspose2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False
+
+        mid = 64
+        self.main = nn.Sequential(
+            # input is Z, going into a convolution
+            nn.ConvTranspose2d(in_channels, mid * 8, 4, 1, 0, bias=False),
+            nn.BatchNorm2d(mid * 8),
+            nn.ReLU(True),
+            # state size. (mid*8) x 4 x 4
+            nn.ConvTranspose2d(mid * 8, mid * 4, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid * 4),
+            nn.ReLU(True),
+            # state size. (mid*4) x 8 x 8
+            nn.ConvTranspose2d(mid * 4, mid * 2, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid * 2),
+            nn.ReLU(True),
+            # state size. (mid*2) x 16 x 16
+            nn.ConvTranspose2d(mid * 2, mid, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid),
+            nn.ReLU(True),
+            # state size. (mid) x 32 x 32
+            nn.ConvTranspose2d(mid, out_channels, 4, 2, 1, bias=False),
+            nn.Tanh()
+            # state size. (nc) x 64 x 64
         )
 
     def forward(self, z):
-        z = self.conv(z)
-        return z
+        return self.main(z)
 
 
-class Discriminator(nn.Module):
-    def __init__(
-        self,
-        side_len: int = 64,
-        in_channels: int = 4,
-        out_channels: int = 1,
-        kernel_size: int = 4,
-        stride: int = 1,
-        padding: int = 1
-    ):
+class Discrim64(nn.Module):
+    def __init__(self, in_channels: int = 4):
         super().__init__()
 
-        conv_size = conv_sz(
-            side_len, side_len,
-            stride, padding, kernel_size, 1
+        mid = 64
+        self.main = nn.Sequential(
+            # input is (in_channels) x 64 x 64
+            nn.Conv2d(in_channels, mid, 4, 2, 1, bias=False),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (mid) x 32 x 32
+            nn.Conv2d(mid, mid * 2, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid * 2),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (mid*2) x 16 x 16
+            nn.Conv2d(mid * 2, mid * 4, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid * 4),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (mid*4) x 8 x 8
+            nn.Conv2d(mid * 4, mid * 8, 4, 2, 1, bias=False),
+            nn.BatchNorm2d(mid * 8),
+            nn.LeakyReLU(0.2, inplace=True),
+            # state size. (mid*8) x 4 x 4
+            nn.Conv2d(mid * 8, 1, 4, 1, 0, bias=False),
+            nn.Flatten(),
+            nn.Sigmoid()
         )
-        flatten_size = out_channels * conv_size[0] * conv_size[1]
-
-        self.conv1 = nn.Conv2d(
-            in_channels=in_channels,
-            out_channels=out_channels,
-            kernel_size=kernel_size,
-            stride=stride,
-            padding=padding,
-            bias=False
-        )
-        self.fc1 = nn.Linear(flatten_size, 1)
 
 
     def forward(self, image):
-        x = F.relu(self.conv1(image))
-        x = x.flatten(start_dim=1)
-        x = F.sigmoid(self.fc1(x))
-        return x
+        return self.main(image)
