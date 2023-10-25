@@ -23,7 +23,7 @@ class EmojiDataset(Dataset):
         # return the ith image as a tensor
         path = self.paths[i]
         im = Image.open(path)
-        rgb_im = im.convert("RGBA")
+        rgb_im = im.convert("RGBA").convert("RGB")
         return self.ops(rgb_im)
 
     def __len__(self):
@@ -33,4 +33,4 @@ class EmojiDataset(Dataset):
 
 if __name__ == "__main__":
     data = EmojiDataset("data/image", (64, 64))
-    print(data[0].shape)
+    sample = data[0]

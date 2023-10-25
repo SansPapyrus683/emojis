@@ -7,7 +7,7 @@ SIDE = 64
 class Generator64(nn.Module):
     def __init__(self,
         in_channels: int = 100,
-        out_channels: int = 4
+        out_channels: int = 3
     ) -> None:
         super().__init__()
 
@@ -31,7 +31,7 @@ class Generator64(nn.Module):
             nn.ReLU(True),
             # state size. (mid) x 32 x 32
             nn.ConvTranspose2d(mid, out_channels, 4, 2, 1, bias=False),
-            nn.Tanh()
+            nn.Sigmoid()
             # state size. (nc) x 64 x 64
         )
 
@@ -40,7 +40,7 @@ class Generator64(nn.Module):
 
 
 class Discrim64(nn.Module):
-    def __init__(self, in_channels: int = 4):
+    def __init__(self, in_channels: int = 3):
         super().__init__()
 
         mid = 64
