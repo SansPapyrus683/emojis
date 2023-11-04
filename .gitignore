@@ -1,5 +1,6 @@
-# the giant kaggle dataset
+# stuff you should just download it yourself
 data/
+models/
 
 # other stuff
 **/__pycache__/
